@@ -47,7 +47,8 @@ def predict_ui(request: Request, url: str = Form(...)):
                 "url": url,
                 "prediction": "phishing",
                 "layer": "rule-based",
-                "confidence": 1.0
+                "confidence": 1.0,
+                "show_result": True
             }
         )
 
@@ -64,7 +65,8 @@ def predict_ui(request: Request, url: str = Form(...)):
             "url": url,
             "prediction": prediction,
             "layer": "ml",
-            "confidence": round(float(prob), 3)
+            "confidence": round(float(prob), 3),
+            "show_result": True
         }
     )
 
