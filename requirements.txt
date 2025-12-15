@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+scikit-learn
+numpy
+pandas
+joblib
+tldextract
+python-Levenshtein
+ipaddress
+rapidfuzz
