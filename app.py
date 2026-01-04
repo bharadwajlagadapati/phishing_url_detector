@@ -65,6 +65,6 @@ def predict_ui(request: Request, url: str = Form(...)):
             "url": url,
             "prediction": prediction,
             "layer": "ml",
-            "confidence": round(float(prob), 3)
+            
         }
     )

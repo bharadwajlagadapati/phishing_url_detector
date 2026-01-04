@@ -52,7 +52,7 @@ suspicious_tlds = {
 
 
 def clean_url(url):
-    url = str(url).strip()  # remove leading/trailing spaces
+    url = str(url).strip()  
     # Remove malformed brackets that break urlparse
     url = re.sub(r"\[.*?\]", "", url)
     # Add scheme if missing (urlparse fails without scheme)
@@ -108,7 +108,7 @@ def clean_text(x):
         return ""
     return x.lower()
 def match_score(brand,part):
-    return 85<=fuzz.ratio(brand,part)<=100
+    return 75<=fuzz.ratio(brand,part)<=100
 
 ### ---------- D1 – D6 Feature Extraction ---------- ###
 
@@ -123,9 +123,8 @@ def extract_bad_domain_features(url, brand_list):
     subdomain = clean_text(subdomain)
     suffix = clean_text(suffix)
 
-    ### ---------------------------------------------------------
     ### D1: Brand in Path or Query (1 if brand appears here)
-    ### ---------------------------------------------------------
+    
     D1 = 0
     for brand in brand_list:
         b = brand.lower()
@@ -133,10 +132,9 @@ def extract_bad_domain_features(url, brand_list):
             D1 = 1
             break
 
-    ### ---------------------------------------------------------
     ### D2: Brand in Subdomain
     ### Detect exact brand OR brand substring OR misspellings
-    ### ---------------------------------------------------------
+
     D2 = 0
     sub_parts = re.split(r"[.-]", subdomain)
     for brand in brand_list:
@@ -150,16 +148,14 @@ def extract_bad_domain_features(url, brand_list):
         # fuzzy match on each token to catch typos
         for part in sub_parts:
             score = fuzz.ratio(part, b)
-            if 85 <= score <= 100:
+            if 75 <= score <= 100:
                 D2 = 1
                 break
         if D2 == 1:
             break
 
 
-    ### ---------------------------------------------------------
     ### D3: Brand as Substring in Primary Domain
-    ### ---------------------------------------------------------
     D3 = 0
     tokens = re.split(r"[-0-9]+", domain)
 
@@ -186,38 +182,33 @@ def extract_bad_domain_features(url, brand_list):
                 D3 = 1
                 break
         sim = fuzz.ratio(domain, b)
-        if 85 <= sim <= 100:
+        if 75 <= sim <= 100:
             D3 = 1
 
 
 
-    ### ---------------------------------------------------------
     ### D4: Brand Typo in Domain
-    ### e.g., amaz0nn, pay-pal-secure, fac3book-shop, etc.
-    ### fuzzy threshold = >=85 but NOT equal 100
-    ### ---------------------------------------------------------
+   
+
     D4 = 0
     for brand in brand_list:
         b = brand.lower()
 
         # fuzzy typo detection
         score = fuzz.ratio(domain, b)
-        if score >= 85 and score != 100:
+        if score >= 75 and score != 100:
             D4 = 1
             break
 
-    ### ---------------------------------------------------------
     ### D5: Fake TLD
     ### suspicious TLD used for brandlike domain
     ### e.g., brand.cyou, brand.top, brand.xyz, brand.shop
-    ### ---------------------------------------------------------
 
 
     D5 = 1 if (suffix in suspicious_tlds) else 0
 
-    ### ---------------------------------------------------------
     ### D6: IP Address Usage
-    ### ---------------------------------------------------------
+
     D6 = has_ip(url)
 
     ### Return all features
@@ -232,7 +223,7 @@ def extract_bad_domain_features(url, brand_list):
 
 
 
-# Remove www for consistency
+
 from urllib.parse import urlparse
 
 def remove_www_prefix(url):
@@ -256,8 +247,6 @@ def extract_features(url):
     url=remove_www_prefix(url)
     hostname, path, query, domain, subdomain, suffix = safe_parse_url(url)
 
-    # Now you can safely compute D1-D5 and L1-L19
-    # For example:
     D1,D2,D3,D4,D5,D6=extract_bad_domain_features(url, brand_list).values()
     L1 = 1 if re.search(r'//', urlparse(url).path) else 0
     L2 = has_ip(url)
